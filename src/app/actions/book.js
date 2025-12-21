@@ -49,14 +49,9 @@ const createBook = (bookPayload) => {
       title: bookPayload['title'],
       author_id: bookPayload['authorId'],
       genres: bookPayload['genres'],
-      publish_date: bookPayload['publication_date']
-  })
-      .then((bookId) => {
-          return fetchBook(bookId['message']);
-      })
-      .then((res) => {
-      return Promise.resolve({ data: res });
-    });
+      publish_date: bookPayload['publication_date'],
+      author_name: bookPayload['authorCanonicalName']
+  });
 };
 
 const updateBook = (bookId, bookPayload) => {

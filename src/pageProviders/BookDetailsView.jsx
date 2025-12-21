@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {useParams, useSearchParams} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import useTheme from 'misc/hooks/useTheme';
 
 import PageContainer from './components/PageContainer';
@@ -10,24 +10,22 @@ const BookDetailsView = (props) => {
         fetchBook,
         createBook,
         updateBook,
-        deleteBook,
         fetchAuthor,
         fetchAuthors
     } = props;
 
     const { bookId } = useParams();
-    const [searchParams] = useSearchParams();
     const { theme } = useTheme();
     const creatingMode = bookId.includes('new');
 
     const [book, setBook] = useState(null);
-    const [authors, setAuthors] = useState(null);
+    const [authors, setAuthors] = useState([]);
     const [errors, setErrors] = useState([]);
     const [isFetchingBook, setIsFetchingBook] = useState(false);
     const [isFetchingAuthors, setIsFetchingAuthors] = useState(false);
     const [isSavingBook, setIsSavingBook] = useState(false);
     const [isEditMode, setIsEditMode] = useState(creatingMode);
-    const [successMessage, setSuccessMessage] = useState(null);
+    const [saveSuccessType, setSaveSuccessType] = useState(null);
 
     useEffect(() => {
         if (creatingMode) {
@@ -37,143 +35,104 @@ const BookDetailsView = (props) => {
                 authorCanonicalName: '',
                 authorId: '',
                 genres: '',
-                publication_date: null,
-                lastUpdateTime: null,
+                publication_date: '',
                 author: null
             });
-
-            setErrors([]);
-            setIsFetchingBook(false);
-            setIsFetchingAuthors(true);
             setIsEditMode(true);
+            setIsFetchingAuthors(true);
             return;
         }
 
-        if (typeof fetchBook === 'function' && bookId) {
-            setIsFetchingBook(true);
-            fetchBook(bookId)
-                .then(bookDetails => {
-                    fetchAuthor(bookDetails['author']['id']).then(authorDetails => {
-                        bookDetails.authorCanonicalName = bookDetails['author']['name'];
-                        bookDetails.author = authorDetails;
-
-                        setBook(bookDetails);
-                        setErrors([]);
-                        setIsFetchingBook(false);
-                    });
-
-                })
-                .catch((err) => {
-                    errorHandler(err, setErrors);
+        setIsFetchingBook(true);
+        fetchBook(bookId)
+            .then(bookDetails =>
+                fetchAuthor(bookDetails.author.id).then(authorDetails => {
+                    bookDetails.author = authorDetails;
+                    bookDetails.authorCanonicalName =
+                        [authorDetails.name.first_name, authorDetails.name.last_name]
+                            .filter(Boolean)
+                            .join(' ');
+                    setBook(bookDetails);
                     setIsFetchingBook(false);
-                });
-        }
+                })
+            )
+            .catch(err => {
+                errorHandler(err, setErrors);
+                setIsFetchingBook(false);
+            });
     }, [bookId, creatingMode, theme]);
 
     useEffect(() => {
-        if (isFetchingAuthors){
-            fetchAuthors()
-                .then(authorInfos => {
-                    setAuthors(authorInfos['list']);
-                    setIsFetchingAuthors(false);
-                })
-                .catch((err) => {
-                    errorHandler(err, setErrors);
-                    setIsFetchingAuthors(false);
-                });
-        }
-    }, [isFetchingAuthors])
+        if (!isEditMode && !creatingMode) return;
+
+        setIsFetchingAuthors(true);
+        fetchAuthors()
+            .then(res => {
+                setAuthors(res.list || []);
+                setIsFetchingAuthors(false);
+            })
+            .catch(err => {
+                errorHandler(err, setErrors);
+                setIsFetchingAuthors(false);
+            });
+    }, [isEditMode, creatingMode]);
 
     const handleSave = (payload) => {
         setIsSavingBook(true);
         setErrors([]);
-        setSuccessMessage(null);
+        setSaveSuccessType(null);
 
         if (creatingMode) {
             return createBook(payload)
-                .then(({ data }) => {
-                    setIsSavingBook(false);
-                    if (typeof window !== 'undefined') {
-                        window.location.assign('/books');
-                    }
-                    setSuccessMessage('Book successfully created!');
-                    return data;
+                .then(() => {
+                    window.location.assign('/books');
+                    setSaveSuccessType('created');
                 })
-                .catch((err) => {
+                .catch(err => {
                     setIsSavingBook(false);
                     errorHandler(err, setErrors);
                 });
         }
 
-        const id = payload?.id || bookId;
-        return updateBook(id, payload)
-            .then(data => {
-                setIsSavingBook(false);
-                if (typeof fetchBook === 'function') {
-                    return fetchBook(id).then(refreshed => {
-                        return fetchAuthor(refreshed['author']['id']).then(authorDetails => {
-                            refreshed.authorCanonicalName = refreshed['author']['name'];
-                            refreshed.author = authorDetails;
-
-                            setBook(refreshed);
-                            setErrors([]);
-                            setIsEditMode(false);
-                            setSuccessMessage('Book successfully updated');
-
-                            setTimeout(() => {
-                                setSuccessMessage(null);
-                            }, 3000);
-
-                            return refreshed;
-                        });
-                    });
-                }
-                return data;
-            })
-            .catch((err) => {
+        return updateBook(bookId, payload)
+            .then(() =>
+                fetchBook(bookId).then(refetched =>
+                    fetchAuthor(refetched.author.id).then(authorDetails => {
+                        refetched.author = authorDetails;
+                        refetched.authorCanonicalName =
+                            [authorDetails.name.first_name, authorDetails.name.last_name]
+                                .filter(Boolean)
+                                .join(' ');
+                        setBook(refetched);
+                        setIsEditMode(false);
+                        setIsSavingBook(false);
+                        setSaveSuccessType('updated');
+                        setTimeout(() => setSaveSuccessType(null), 3000);
+                    })
+                )
+            )
+            .catch(err => {
                 setIsSavingBook(false);
                 errorHandler(err, setErrors);
-                return Promise.reject(err);
             });
     };
 
     const handleEdit = () => {
         setIsEditMode(true);
         setErrors([]);
-        setSuccessMessage(null);
+        setSaveSuccessType(null);
     };
 
     const handleCancelEdit = () => {
         if (creatingMode) {
-            handleBack();
+            window.location.assign('/books');
         } else {
             setIsEditMode(false);
-            setErrors([]);
-            setSuccessMessage(null);
-            if (typeof fetchBook === 'function' && bookId) {
-                setIsFetchingBook(true);
-                fetchBook(bookId)
-                    .then(bookDetails => {
-                        fetchAuthor(bookDetails['author']['id']).then(authorDetails => {
-                            bookDetails.authorCanonicalName = bookDetails['author']['name'];
-                            bookDetails.author = authorDetails;
-
-                            setBook(bookDetails);
-                            setIsFetchingBook(false);
-                        });
-                    })
-                    .catch((err) => {
-                        errorHandler(err, setErrors);
-                        setIsFetchingBook(false);
-                    });
-            }
         }
     };
 
     const handleBack = () => {
-        if (typeof window !== 'undefined') {
-            window.location.assign('/books');
-        }
+        window.location.assign('/books');
     };
 
     return (
@@ -182,7 +141,7 @@ const BookDetailsView = (props) => {
                 book={book}
                 authors={authors}
                 errors={errors}
-                successMessage={successMessage}
+                saveSuccessType={saveSuccessType}
                 isFetchingBook={isFetchingBook}
                 isSavingBook={isSavingBook}
                 isCreatingMode={creatingMode}
@@ -198,11 +157,7 @@ const BookDetailsView = (props) => {
 };
 
 const errorHandler = (err, setErrors) => {
-    const messages = Array.isArray(err)
-        ? err.map(e => e.description || e.code || String(e))
-        : [(err && err.message) || String(err)];
-    setErrors(messages);
-    return err;
+    setErrors([(err && err.message) || String(err)]);
 };
 
 export default BookDetailsView;

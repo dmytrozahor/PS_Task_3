@@ -11,6 +11,9 @@
   "book.error.EMPTY_GENRES": "Genres are required",
   "book.error.EMPTY_PUBLICATION": "Publication date is required",
 
+  "book.success.created": "Book successfully created",
+  "book.success.updated": "Book successfully saved",
+
   "author.information": "Author Information",
 
   "field.id": "ID",

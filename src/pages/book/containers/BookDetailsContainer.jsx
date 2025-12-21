@@ -89,11 +89,11 @@ function BookDetailsContainer({
                                   book,
                                   authors,
                                   errors,
-                                  successMessage,
+                                  saveSuccessType,
                                   isFetchingBook,
                                   isSavingBook,
                                   isCreatingMode,
-                                  isEditMode, // Now comes from parent
+                                  isEditMode,
                                   isFetchingAuthors,
                                   onBack,
                                   onSave,
@@ -111,19 +111,19 @@ function BookDetailsContainer({
     useEffect(() => {
         if (book && !editableBook) {
             setEditableBook({
+                ...book,
                 title: book.title || '',
-                authorCanonicalName: book['authorCanonicalName'] || '',
                 genres: book.genres || '',
-                publication_date: book.publication_date || Date.now().toString(),
-                authorId: book.author?.id || '',
-                ...book
+                publication_date: book.publication_date || '',
+                authorId: book.author?.id?.toString() || '',
+                authorCanonicalName: book.authorCanonicalName || '',
             });
         }
     }, [book, editableBook]);
 
     useEffect(() => {
         if (errors && errors.length) {
-            const messages = errors.map(error => error.description || error.code || error);
+            const messages = errors.map(error => error.message || error);
             setExternalErrors(messages);
         } else {
             setExternalErrors([]);
@@ -248,10 +248,15 @@ function BookDetailsContainer({
 
                 <CardContent>
                     {/* Success Message */}
-                    {successMessage && (
+                    {saveSuccessType && (
                         <div className={classes.successMessage}>
                             <Typography>
-                                {successMessage}
+                                {formatMessage({
+                                    id:
+                                        saveSuccessType === 'created'
+                                            ? 'book.success.created'
+                                            : 'book.success.updated'
+                                })}
                             </Typography>
                         </div>
                     )}
@@ -291,48 +296,36 @@ function BookDetailsContainer({
                                     value={editableBook?.genres || ''}
                                 />
                                 <Select
-                                    helperText={validationErrors.includes(errorTypes.EMPTY_AUTHOR)
-                                        && formatMessage({ id: `book.error.${errorTypes.EMPTY_AUTHOR}` })}
-                                    isError={validationErrors.includes(errorTypes.EMPTY_AUTHOR)}
                                     label={formatMessage({ id: 'field.author' })}
-                                    onChange={({ target }) => {
-                                        handleFieldChange('authorId', target.value);
-                                        const selectedAuthor = authors?.find(a => a.id === target.value);
-                                        if (selectedAuthor) {
-                                            handleFieldChange('authorCanonicalName', selectedAuthor.name);
-                                        }
-                                    }}
-                                    value={editableBook?.authorId || editableBook?.author?.id || ''}
+                                    value={editableBook?.authorId || ''}
                                     required
                                     disabled={isFetchingAuthors || isSavingBook}
-                                >
-                                    {
-                                        (() => {
-                                            if (authors && authors.length > 0) {
-                                                return authors.map((author) => {
-                                                    return (
-                                                        <MenuItem key={author.id} value={author.id}>
-                                                            {author.name}
-                                                        </MenuItem>
-                                                    );
-                                                });
-                                            } else if (editableBook?.author) {
-                                                return (
-                                                    <MenuItem
-                                                        key={editableBook.author.id}
-                                                        value={editableBook.author.id}>
-                                                        {editableBook.authorCanonicalName || editableBook.author.name}
-                                                    </MenuItem>
-                                                );
-                                            } else {
-                                                return (
-                                                    <MenuItem value="" disabled>
-                                                        {formatMessage({ id: 'loading' })}
-                                                    </MenuItem>
-                                                );
-                                            }
-                                        })()
+                                    isError={validationErrors.includes(errorTypes.EMPTY_AUTHOR)}
+                                    helperText={
+                                        validationErrors.includes(errorTypes.EMPTY_AUTHOR) &&
+                                        formatMessage({ id: `book.error.${errorTypes.EMPTY_AUTHOR}` })
                                     }
+                                    onChange={({ target }) => {
+                                        const value = target.value;
+                                        handleFieldChange('authorId', value);
+
+                                        const selectedAuthor = authors?.find(
+                                            a => a.id.toString() === value
+                                        );
+
+                                        if (selectedAuthor) {
+                                            handleFieldChange(
+                                                'authorCanonicalName',
+                                                selectedAuthor.name
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {authors?.map(author => (
+                                        <MenuItem key={author.id} value={author.id.toString()}>
+                                            {author.name}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                                 <TextField
                                     helperText={validationErrors.includes(errorTypes.EMPTY_PUBLICATION)

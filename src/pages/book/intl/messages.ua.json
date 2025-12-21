@@ -13,6 +13,9 @@
 
   "author.information": "Інформація про автора",
 
+  "book.success.created": "Книгу успішно збережено",
+  "book.success.updated": "Книгу успішно оновлено",
+
   "field.id": "ID",
   "field.title": "Назва",
   "field.author": "Ім'я автора",
