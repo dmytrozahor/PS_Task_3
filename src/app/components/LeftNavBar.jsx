@@ -13,6 +13,7 @@ import SwipeableDrawer from 'components/SwipeableDrawer';
 import Typography from 'components/Typography';
 import useAccessValidate from 'misc/hooks/useAccessValidate';
 import useTheme from 'misc/hooks/useTheme';
+import {StepIcon} from "@mui/material";
 
 const getClasses = createUseStyles((theme) => ({
   menuHeaderSpace: {
@@ -21,12 +22,27 @@ const getClasses = createUseStyles((theme) => ({
 }));
 
 const menuItems = [
-  {
-    icon: <IconLockOpen />,
-    link: `${pagesURLs[pages.secretPage]}`,
-    neededAuthorities: [authorities.ENABLE_SEE_SECRET_PAGE],
-    titleIntlId: `page.${pages.secretPage}`,
-  },
+    {
+        icon: <IconLockOpen />,
+        link: `${pagesURLs[pages.secretPage]}`,
+        neededAuthorities: [authorities.ENABLE_SEE_SECRET_PAGE],
+        titleIntlId: `page.${pages.secretPage}`,
+    },
+
+    {
+        icon: <IconLockOpen />,
+        link: `${pagesURLs[pages.bookList]}`,
+        neededAuthorities: [authorities.ENABLE_SEE_SECRET_PAGE],
+        titleIntlId: `page.${pages.bookList}`,
+    },
+
+    {
+        icon: <IconLockOpen />,
+        link: `${pagesURLs[pages.book]}`,
+        neededAuthorities: [authorities.ENABLE_SEE_SECRET_PAGE],
+        titleIntlId: `page.${pages.book}`,
+    },
+
 ];
 
 function LeftNavBar() {
