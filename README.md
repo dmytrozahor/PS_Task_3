@@ -3,7 +3,7 @@
 <p>This project features one of the applications developed under the guidance and mentoring during an internship at the company ProfItSoft, the winter fall 2025.</p>
 
 ### Objective
-In this project we should use the capabilities of `React` for the frontend part and `Java` for the backend part to create a service for book details management.
+In this project we should use the capabilities of `React` for the frontend part and `Java` (with `Spring Framework`) ([PS-Task-2](https://github.com/dmytrozahor/PS_Task_2)) for the backend part to create a service for book details management.
 
 ![img.png](img/img.png)
 ![img_1.png](img/img_1.png)
