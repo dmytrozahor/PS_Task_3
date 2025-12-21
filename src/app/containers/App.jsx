@@ -21,7 +21,7 @@ import Header from '../components/Header';
 import IntlProvider from '../components/IntlProvider';
 import MissedPage from '../components/MissedPage';
 import SearchParamsConfigurator from '../components/SearchParamsConfigurator';
-import BookListView from "../../pageProviders/BookList";
+import BookListView from "../../pageProviders/BookListView";
 import BookDetailsView from "../../pageProviders/BookDetailsView";
 
 function App() {
