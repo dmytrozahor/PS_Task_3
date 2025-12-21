@@ -1,0 +1,25 @@
+{
+  "loading": "Завантаження...",
+
+  "books.list": "Список книг",
+  "books.empty": "Книги не знайдено",
+
+  "field.title": "Назва",
+  "field.authorCanonicalName": "Канонічне ім'я автора",
+
+  "btn.filter": "Фільтр",
+  "btn.addBook": "Додати книгу",
+  "btn.previous": "Попередня",
+  "btn.next": "Наступна",
+  "btn.clear": "Очистити",
+  "btn.apply": "Застосувати",
+  "btn.cancel": "Скасувати",
+  "btn.delete": "Видалити",
+
+  "filter.title": "Фільтр книг",
+
+  "delete.confirmation": "Підтвердження видалення",
+  "delete.confirmation.message": "Ви впевнені, що хочете видалити \"{title}\"?",
+
+  "pagination.info": "Сторінка {current} з {total}"
+}

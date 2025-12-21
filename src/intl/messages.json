@@ -4,6 +4,8 @@
   "page.default": "Home",
   "page.login": "Login",
   "page.secret": "Secret Page",
+  "page.books": "Book list",
+  "page.books/:bookId": "Book",
   "signIn": "Sign In",
   "signOut": "Sign Out"
 }

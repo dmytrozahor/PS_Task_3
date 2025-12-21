@@ -1,0 +1,33 @@
+{
+  "loading": "Завантаження...",
+
+  "book.details": "Деталі книги",
+  "book.create": "Створити нову книгу",
+  "book.notFound": "Книгу не знайдено",
+  "book.information": "Інформація про книгу",
+
+  "book.error.EMPTY_TITLE": "Назва є обов'язковою",
+  "book.error.EMPTY_AUTHOR": "Автор є обов'язковим",
+  "book.error.EMPTY_GENRES": "Жанри є обов'язковими",
+  "book.error.EMPTY_PUBLICATION": "Дата публікації є обов'язковою",
+
+  "author.information": "Інформація про автора",
+
+  "field.id": "ID",
+  "field.title": "Назва",
+  "field.author": "Ім'я автора",
+  "field.genres": "Жанри",
+  "field.publication": "Дата публікації",
+  "field.lastUpdateTime": "Остання зміна",
+  "field.name": "Ім'я",
+  "field.canonicalName": "Канонічне ім'я",
+  "field.email": "Електронна пошта",
+  "field.phoneNumber": "Номер телефону",
+  "field.address": "Адреса",
+
+  "btn.back": "Назад",
+  "btn.edit": "Редагувати",
+  "btn.save": "Зберегти",
+  "btn.create": "Створити",
+  "btn.cancel": "Скасувати"
+}

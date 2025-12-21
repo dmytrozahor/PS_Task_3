@@ -1,0 +1,25 @@
+{
+  "loading": "Loading...",
+
+  "books.list": "Books List",
+  "books.empty": "No books found",
+
+  "field.title": "Title",
+  "field.authorCanonicalName": "Author Canonical Name",
+
+  "btn.filter": "Filter",
+  "btn.addBook": "Add Book",
+  "btn.previous": "Previous",
+  "btn.next": "Next",
+  "btn.clear": "Clear",
+  "btn.apply": "Apply",
+  "btn.cancel": "Cancel",
+  "btn.delete": "Delete",
+
+  "filter.title": "Filter Books",
+
+  "delete.confirmation": "Delete Confirmation",
+  "delete.confirmation.message": "Are you sure you want to delete \"{title}\"?",
+
+  "pagination.info": "Page {current} of {total}"
+}

@@ -4,6 +4,8 @@
   "page.default": "Головна",
   "page.login": "Логiн",
   "page.secret": "Секретна Сторiнка",
+  "page.books": "Книгарня",
+  "page.books/:bookId": "Книга",
   "signIn": "Увiйти",
   "signOut": "Вийти"
 }

@@ -1,0 +1,33 @@
+{
+  "loading": "Loading...",
+
+  "book.details": "Book Details",
+  "book.create": "Create New Book",
+  "book.notFound": "Book not found",
+  "book.information": "Book Information",
+
+  "book.error.EMPTY_TITLE": "Title is required",
+  "book.error.EMPTY_AUTHOR": "Author canonical name is required",
+  "book.error.EMPTY_GENRES": "Genres are required",
+  "book.error.EMPTY_PUBLICATION": "Publication date is required",
+
+  "author.information": "Author Information",
+
+  "field.id": "ID",
+  "field.title": "Title",
+  "field.author": "Author Name",
+  "field.genres": "Genres",
+  "field.publication": "Publication Date",
+  "field.lastUpdateTime": "Last Updated",
+  "field.name": "Name",
+  "field.canonicalName": "Canonical Name",
+  "field.email": "Email",
+  "field.phoneNumber": "Phone Number",
+  "field.address": "Address",
+
+  "btn.back": "Back",
+  "btn.edit": "Edit",
+  "btn.save": "Save",
+  "btn.create": "Create",
+  "btn.cancel": "Cancel"
+}

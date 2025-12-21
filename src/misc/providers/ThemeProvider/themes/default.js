@@ -27,6 +27,27 @@ const commonColors = {
   },
 };
 const theme = {
+  // provide palette compatibility used by components (e.g. theme.palette.divider, theme.palette.background.secondary)
+  palette: {
+    divider: '#E6E6E6',
+    background: {
+      ...commonColors.background,
+      // keep a shallow copy for backward compatibility
+      secondary: commonColors.background.secondary,
+      primary: commonColors.background.primary,
+      edit: commonColors.background.edit,
+      error: commonColors.background.error,
+      info: commonColors.background.info,
+      success: commonColors.background.success,
+      warning: commonColors.background.warning,
+    },
+    // Add action styles so components referencing theme.palette.action.* do not fail
+    action: {
+      hover: 'rgba(0, 0, 0, 0.05)',
+      selected: 'rgba(0, 0, 0, 0.10)',
+    },
+  },
+
   button: {
     color: {
       header: {
