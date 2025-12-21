@@ -64,7 +64,7 @@ There are functional and technical requirements that must be complied with, shor
 - The following containers were introduced: `BookDetailsContainer`, `BookListContainer`.
 - A clear structure was maintained to separate `containers`, `views` and `actions`.
 - A separate component `EditIcon` was introduced to comply with the functional requirements.
-
+- Additionally, was introduced `Docker` config for a comfortable deployment.
 
 ### Building the application
 Use the task `npm run start` running the application from the root dir.
