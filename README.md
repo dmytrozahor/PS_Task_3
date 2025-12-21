@@ -8,6 +8,7 @@ In this project we should use the capabilities of `React` for the frontend part 
 ![img.png](img/img.png)
 ![img_1.png](img/img_1.png)
 ![img_2.png](img/img_2.png)
+![img_3.png](img/img_3.png)
 
 ### Requirements
 There are functional and technical requirements that must be complied with, short overview of which is provided below.

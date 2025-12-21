@@ -39,6 +39,7 @@ const BookListView = (props) => {
     const [currentPage, setCurrentPage] = useState(initialState.page);
     const [isFetchingBooks, setIsFetchingBooks] = useState(false);
     const [isDeletingBook, setIsDeletingBook] = useState(false);
+    const [successType, setSuccessType] = useState('');
     const [deleteError, setDeleteError] = useState(null);
     const [filters, setFilters] = useState(initialState.filters);
     const pageSize = 8;
@@ -102,6 +103,9 @@ const BookListView = (props) => {
                 return Promise.reject(err);
             }).then(() => {
                 setIsDeletingBook(false);
+                setSuccessType('deleted');
+
+                setTimeout(() => setSuccessType(null), 3000);
                 return loadPage(currentPage, filters);
             });
     };
@@ -133,6 +137,7 @@ const BookListView = (props) => {
                 onBookClick={handleBookClick}
                 onCreateClick={handleCreateClick}
                 onDeleteBook={handleDeleteBook}
+                successType={successType}
             />
         </PageContainer>
     );

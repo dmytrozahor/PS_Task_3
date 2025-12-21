@@ -11,7 +11,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import TextField from 'components/TextField';
 import Typography from 'components/Typography';
 import IconHome from 'components/icons/Home';
-import IconEdit from 'components/icons/Menu'; // Temporarily use Menu icon as Edit
 import Select from "../../../components/Select";
 import MenuItem from "../../../components/MenuItem";
 import Edit from "../../../components/icons/Edit";
@@ -19,9 +18,10 @@ import Edit from "../../../components/icons/Edit";
 const getClasses = createUseStyles((theme) => ({
     container: {
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: 'column',
         padding: `${theme.spacing(2)}px`,
+        gap: `${theme.spacing(2)}px`,
+        position: 'relative', // <-- add this
     },
     content: {
         display: 'flex',
@@ -61,12 +61,16 @@ const getClasses = createUseStyles((theme) => ({
         gap: `${theme.spacing(2)}px`,
     },
     successMessage: {
+        position: 'absolute',
+        top: `${theme.spacing(2)}px`,
+        left: '50%',
+        transform: 'translateX(-50%)',
         padding: `${theme.spacing(2)}px`,
         backgroundColor: '#d4edda',
         color: '#155724',
         borderRadius: '4px',
-        marginBottom: `${theme.spacing(2)}px`,
         border: '1px solid #c3e6cb',
+        zIndex: 1000,
     },
     errorMessage: {
         padding: `${theme.spacing(2)}px`,
@@ -252,10 +256,14 @@ function BookDetailsContainer({
                         <div className={classes.successMessage}>
                             <Typography>
                                 {formatMessage({
-                                    id:
-                                        saveSuccessType === 'created'
-                                            ? 'book.success.created'
-                                            : 'book.success.updated'
+                                    id: (() => {
+                                        switch (saveSuccessType) {
+                                            case 'created':
+                                                return 'book.success.created';
+                                            case 'updated':
+                                                return 'book.success.updated';
+                                        }
+                                    })(),
                                 })}
                             </Typography>
                         </div>

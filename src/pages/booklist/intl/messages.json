@@ -7,6 +7,10 @@
   "field.title": "Title",
   "field.authorCanonicalName": "Author Canonical Name",
 
+  "book.success.deleted": "Book successfully deleted",
+  "book.success.unknown": "There is no localization for this kind of a book action. Contact the administrator.",
+
+
   "btn.filter": "Filter",
   "btn.addBook": "Add Book",
   "btn.previous": "Previous",

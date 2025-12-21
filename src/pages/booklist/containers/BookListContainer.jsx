@@ -16,8 +16,7 @@ const getClasses = createUseStyles((theme) => ({
     container: {
         display: 'flex',
         flexDirection: 'column',
-        padding: `${theme.spacing(2)}px`,
-        gap: `${theme.spacing(2)}px`,
+        position: 'relative', // needed for floating message
     },
     header: {
         display: 'flex',
@@ -32,7 +31,6 @@ const getClasses = createUseStyles((theme) => ({
     booksList: {
         display: 'flex',
         flexDirection: 'column',
-        gap: `${theme.spacing(1)}px`,
     },
     bookItem: {
         display: 'flex',
@@ -84,6 +82,25 @@ const getClasses = createUseStyles((theme) => ({
         alignItems: 'center',
         padding: `${theme.spacing(4)}px`,
     },
+    successMessage: {
+        position: 'absolute',       // position relative to container
+        left: '50%',
+        right: '50%',
+        marginRight: '10px',
+        padding: `${theme.spacing(2)}px`,
+        backgroundColor: '#d4edda',
+        color: '#155724',
+        borderRadius: '4px',
+        border: '1px solid #c3e6cb',
+        zIndex: 1000,
+        width: 'fit-content',
+        textAlign: 'center',
+        transition: 'opacity 0.3s ease',
+    },
+
+    listWrapper: {
+        position: 'relative',
+    },
 }));
 
 function BookListContainer({
@@ -93,18 +110,18 @@ function BookListContainer({
                                isFetchingBooks,
                                isDeletingBook,
                                deleteError,
-                               filters, // Array: [{ attribute: 'TITLE', value: '...' }, ...]
+                               filters,
                                onPageChange,
                                onFilterChange,
                                onBookClick,
                                onCreateClick,
                                onDeleteBook,
+                               successType,
                            }) {
     const { formatMessage } = useIntl();
     const { theme } = useTheme();
     const classes = getClasses({ theme });
 
-    // Helper function to extract filter values from array
     const getFilterValue = (filterArray, attribute) => {
         const filter = filterArray?.find(f => f.attribute === attribute);
         return filter?.value || '';
@@ -118,7 +135,7 @@ function BookListContainer({
         filterAuthorCanonicalName: getFilterValue(filters, 'AUTHOR_CANONICAL_NAME'),
     });
 
-    // Update local state when filters prop changes (e.g., when restored from sessionStorage)
+    // Update local state when filters prop changes
     useEffect(() => {
         setState(prevState => ({
             ...prevState,
@@ -139,49 +156,25 @@ function BookListContainer({
 
     const handleApplyFilter = () => {
         const newFilters = [];
-
-        if (state.filterTitle && state.filterTitle !== "") {
-            newFilters.push({
-                'attribute': 'TITLE',
-                'value': state.filterTitle,
-            });
+        if (state.filterTitle) {
+            newFilters.push({ attribute: 'TITLE', value: state.filterTitle });
         }
-
-        if (state.filterAuthorCanonicalName && state.filterAuthorCanonicalName !== "") {
-            newFilters.push({
-                'attribute': 'AUTHOR_CANONICAL_NAME',
-                'value': state.filterAuthorCanonicalName,
-            });
+        if (state.filterAuthorCanonicalName) {
+            newFilters.push({ attribute: 'AUTHOR_CANONICAL_NAME', value: state.filterAuthorCanonicalName });
         }
-
         onFilterChange(newFilters);
-        setState({
-            ...state,
-            isFilterDialogOpen: false,
-        });
+        setState({ ...state, isFilterDialogOpen: false });
     };
 
     const handleClearFilter = () => {
-        setState({
-            ...state,
-            filterTitle: '',
-            filterAuthorCanonicalName: '',
-        });
-
+        setState({ ...state, filterTitle: '', filterAuthorCanonicalName: '' });
         onFilterChange([]);
     };
 
     const handleDeleteClick = (e, book) => {
         e.stopPropagation();
-
-        if (book === undefined)
-            return;
-
-        setState({
-            ...state,
-            isDeleteDialogOpen: true,
-            bookToDelete: book,
-        });
+        if (!book) return;
+        setState({ ...state, isDeleteDialogOpen: true, bookToDelete: book });
     };
 
     const handleConfirmDelete = () => {
@@ -191,17 +184,24 @@ function BookListContainer({
     };
 
     const handleCancelDelete = () => {
-        setState({
-            ...state,
-            isDeleteDialogOpen: false,
-            bookToDelete: null,
-        });
+        setState({ ...state, isDeleteDialogOpen: false, bookToDelete: null });
     };
 
     const hasActiveFilters = state.filterTitle || state.filterAuthorCanonicalName;
 
     return (
+
         <div className={classes.container}>
+            {/* Floating success message */}
+            {successType && (
+                <div className={classes.successMessage}>
+                    <Typography>
+                        {formatMessage({
+                            id: successType === 'deleted' ? 'book.success.deleted' : '',
+                        })}
+                    </Typography>
+                </div>
+            )}
             <div className={classes.header}>
                 <Typography variant="title">
                     {formatMessage({ id: 'books.list' })}
@@ -209,21 +209,14 @@ function BookListContainer({
                 <div className={classes.headerActions}>
                     <Button
                         colorVariant="secondary"
-                        onClick={() => setState({
-                            ...state,
-                            isFilterDialogOpen: true,
-                        })}
+                        onClick={() => setState({ ...state, isFilterDialogOpen: true })}
                         variant="secondary"
                     >
                         <Typography>
-                            {formatMessage({ id: 'btn.filter' })}
-                            {hasActiveFilters && ' ✓'}
+                            {formatMessage({ id: 'btn.filter' })}{hasActiveFilters && ' ✓'}
                         </Typography>
                     </Button>
-                    <Button
-                        onClick={onCreateClick}
-                        variant="primary"
-                    >
+                    <Button onClick={onCreateClick} variant="primary">
                         <Typography color="inherit">
                             {formatMessage({ id: 'btn.addBook' })}
                         </Typography>
@@ -231,93 +224,83 @@ function BookListContainer({
                 </div>
             </div>
 
-            {isFetchingBooks ? (
-                <div className={classes.emptyState}>
-                    <Typography>
-                        {formatMessage({ id: 'loading' })}
-                    </Typography>
-                </div>
-            ) : books && books.length > 0 ? (
-                <>
-                    <div className={classes.booksList}>
-                        {books.map(book => (
-                            <div
-                                key={book.id}
-                                className={classes.bookItem}
-                                onClick={() => onBookClick(book.id)}
-                            >
-                                <div className={classes.bookInfo}>
-                                    <Typography variant="subTitle">
-                                        {book.title + ' (№ ' + book['id'] + ')'}
-                                    </Typography>
-                                    <Typography color="secondary">
-                                        {book['full_author_name']}
-                                    </Typography>
+            <div className={classes.listWrapper}>
+                {isFetchingBooks ? (
+                    <div className={classes.emptyState}>
+                        <Typography>{formatMessage({ id: 'loading' })}</Typography>
+                    </div>
+                ) : books && books.length > 0 ? (
+                    <>
+                        <div className={classes.booksList}>
+                            {books.map(book => (
+                                <div
+                                    key={book.id}
+                                    className={classes.bookItem}
+                                    onClick={() => onBookClick(book.id)}
+                                >
+                                    <div className={classes.bookInfo}>
+                                        <Typography variant="subTitle">
+                                            {book.title + ' (№ ' + book.id + ')'}
+                                        </Typography>
+                                        <Typography color="secondary">
+                                            {book.full_author_name}
+                                        </Typography>
+                                    </div>
+                                    <Button
+                                        className={classes.deleteButton}
+                                        onClick={(e) => handleDeleteClick(e, book)}
+                                        variant="secondary"
+                                    >
+                                        <Typography color="inherit">
+                                            {formatMessage({ id: 'btn.delete' })}
+                                        </Typography>
+                                    </Button>
                                 </div>
+                            ))}
+                        </div>
+
+                        {totalPages > 1 && (
+                            <div className={classes.pagination}>
                                 <Button
-                                    className={classes.deleteButton}
-                                    onClick={(e) => handleDeleteClick(e, book)}
+                                    disabled={currentPage === 0}
+                                    onClick={() => onPageChange(currentPage - 1)}
                                     variant="secondary"
                                 >
-                                    <Typography color="inherit">
-                                        {formatMessage({ id: 'btn.delete' })}
-                                    </Typography>
+                                    <Typography>{formatMessage({ id: 'btn.previous' })}</Typography>
+                                </Button>
+                                <Typography>
+                                    {formatMessage(
+                                        { id: 'pagination.info' },
+                                        { current: currentPage + 1, total: totalPages }
+                                    )}
+                                </Typography>
+                                <Button
+                                    disabled={currentPage >= totalPages - 1}
+                                    onClick={() => onPageChange(currentPage + 1)}
+                                    variant="secondary"
+                                >
+                                    <Typography>{formatMessage({ id: 'btn.next' })}</Typography>
                                 </Button>
                             </div>
-                        ))}
+                        )}
+                    </>
+                ) : (
+                    <div className={classes.emptyState}>
+                        <Typography color="secondary">
+                            {formatMessage({ id: 'books.empty' })}
+                        </Typography>
                     </div>
-
-                    {totalPages > 1 && (
-                        <div className={classes.pagination}>
-                            <Button
-                                disabled={currentPage === 0}
-                                onClick={() => onPageChange(currentPage - 1)}
-                                variant="secondary"
-                            >
-                                <Typography>
-                                    {formatMessage({ id: 'btn.previous' })}
-                                </Typography>
-                            </Button>
-                            <Typography>
-                                {formatMessage(
-                                    { id: 'pagination.info' },
-                                    { current: currentPage + 1, total: totalPages }
-                                )}
-                            </Typography>
-                            <Button
-                                disabled={currentPage >= totalPages - 1}
-                                onClick={() => onPageChange(currentPage + 1)}
-                                variant="secondary"
-                            >
-                                <Typography>
-                                    {formatMessage({ id: 'btn.next' })}
-                                </Typography>
-                            </Button>
-                        </div>
-                    )}
-                </>
-            ) : (
-                <div className={classes.emptyState}>
-                    <Typography color="secondary">
-                        {formatMessage({ id: 'books.empty' })}
-                    </Typography>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Filter Dialog */}
-            <Dialog
-                maxWidth="sm"
-                open={state.isFilterDialogOpen}
-            >
+            <Dialog maxWidth="sm" open={state.isFilterDialogOpen}>
                 <Card>
                     <CardTitle>
                         <Typography variant="subTitle">
                             {formatMessage({ id: 'filter.title' })}
                         </Typography>
-                        <IconButton onClick={() => setState({
-                            ...state,
-                            isFilterDialogOpen: false,
-                        })}>
+                        <IconButton onClick={() => setState({ ...state, isFilterDialogOpen: false })}>
                             <IconClose size={24} />
                         </IconButton>
                     </CardTitle>
@@ -325,39 +308,20 @@ function BookListContainer({
                         <div className={classes.dialogContent}>
                             <TextField
                                 label={formatMessage({ id: 'field.title' })}
-                                onChange={({ target }) => setState({
-                                    ...state,
-                                    filterTitle: target.value,
-                                })}
+                                onChange={({ target }) => setState({ ...state, filterTitle: target.value })}
                                 value={state.filterTitle}
                             />
                             <TextField
                                 label={formatMessage({ id: 'field.author' })}
-                                onChange={({ target }) => setState({
-                                    ...state,
-                                    filterAuthorCanonicalName: target.value,
-                                })}
+                                onChange={({ target }) => setState({ ...state, filterAuthorCanonicalName: target.value })}
                                 value={state.filterAuthorCanonicalName}
                             />
                             <div className={classes.dialogButtons}>
-                                <Button
-                                    colorVariant="secondary"
-                                    onClick={handleClearFilter}
-                                    variant="secondary"
-                                >
-                                    <Typography>
-                                        {formatMessage({ id: 'btn.clear' })}
-                                    </Typography>
+                                <Button colorVariant="secondary" onClick={handleClearFilter} variant="secondary">
+                                    <Typography>{formatMessage({ id: 'btn.clear' })}</Typography>
                                 </Button>
-                                <Button
-                                    onClick={handleApplyFilter}
-                                    variant="primary"
-                                >
-                                    <Typography color="inherit">
-                                        <strong>
-                                            {formatMessage({ id: 'btn.apply' })}
-                                        </strong>
-                                    </Typography>
+                                <Button onClick={handleApplyFilter} variant="primary">
+                                    <Typography color="inherit"><strong>{formatMessage({ id: 'btn.apply' })}</strong></Typography>
                                 </Button>
                             </div>
                         </div>
@@ -366,57 +330,31 @@ function BookListContainer({
             </Dialog>
 
             {/* Delete Confirmation Dialog */}
-            <Dialog
-                maxWidth="xs"
-                open={state.isDeleteDialogOpen}
-            >
+            <Dialog maxWidth="xs" open={state.isDeleteDialogOpen}>
                 <Card>
                     <CardTitle>
-                        <Typography variant="subTitle">
-                            {formatMessage({ id: 'delete.confirmation' })}
-                        </Typography>
-                        <IconButton onClick={handleCancelDelete}>
-                            <IconClose size={24} />
-                        </IconButton>
+                        <Typography variant="subTitle">{formatMessage({ id: 'delete.confirmation' })}</Typography>
+                        <IconButton onClick={handleCancelDelete}><IconClose size={24} /></IconButton>
                     </CardTitle>
                     <CardContent>
                         <div className={classes.dialogContent}>
                             {deleteError ? (
                                 <Card variant="error">
                                     <CardContent>
-                                        <Typography color="error">
-                                            {deleteError}
-                                        </Typography>
+                                        <Typography color="error">{deleteError}</Typography>
                                     </CardContent>
                                 </Card>
                             ) : (
                                 <Typography>
-                                    {formatMessage(
-                                        { id: 'delete.confirmation.message' },
-                                        { title: state.bookToDelete?.title }
-                                    )}
+                                    {formatMessage({ id: 'delete.confirmation.message' }, { title: state.bookToDelete?.title })}
                                 </Typography>
                             )}
                             <div className={classes.dialogButtons}>
-                                <Button
-                                    colorVariant="secondary"
-                                    onClick={handleCancelDelete}
-                                    variant="secondary"
-                                >
-                                    <Typography>
-                                        {formatMessage({ id: 'btn.cancel' })}
-                                    </Typography>
+                                <Button colorVariant="secondary" onClick={handleCancelDelete} variant="secondary">
+                                    <Typography>{formatMessage({ id: 'btn.cancel' })}</Typography>
                                 </Button>
-                                <Button
-                                    isLoading={isDeletingBook}
-                                    onClick={handleConfirmDelete}
-                                    variant="primary"
-                                >
-                                    <Typography color="inherit">
-                                        <strong>
-                                            {formatMessage({ id: 'btn.delete' })}
-                                        </strong>
-                                    </Typography>
+                                <Button isLoading={isDeletingBook} onClick={handleConfirmDelete} variant="primary">
+                                    <Typography color="inherit"><strong>{formatMessage({ id: 'btn.delete' })}</strong></Typography>
                                 </Button>
                             </div>
                         </div>
