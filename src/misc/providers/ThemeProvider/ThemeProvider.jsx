@@ -15,9 +15,11 @@ const ThemesToThemeNames = {
   [themeNames.default]: defaultTheme,
 };
 
+// Provide a meaningful default theme in the context so consumers using the context
+// before a provider mounts receive a full theme object (avoids runtime errors).
 export const ThemeContext = createContext({
   changeTheme: () => {},
-  theme: {},
+  theme: defaultTheme,
 });
 
 const ThemeProvider = ({
